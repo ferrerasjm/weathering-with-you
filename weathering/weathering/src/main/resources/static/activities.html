@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Activities</title>
+    <link rel="stylesheet" href="activities.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+</head>
+<body>
+<div class="container">
+    <a href="index.html" class="back-btn">
+        <img src="back.png" alt="Back">
+    </a>
+
+    <div class="board">
+        <h2>WEATHER PLANS</h2>
+
+        <div class="browse-controls">
+            <button class="browse-btn" id="prev-btn">&lt;</button>
+            <p id="location-name-display">Loading...</p>
+            <button class="browse-btn" id="next-btn">&gt;</button>
+        </div>
+
+        <div class="content" id="activitiesList"></div>
+    </div>
+</div>
+
+<script>
+    // Weather-based activity lists (same as before)
+    const activities = {
+      Clear: ["Do your Laundry", "Go for a Walk", "Gardening/Yard Work", "Wash the Car"],
+      Clouds: ["Deep Clean a Room", "Indoor Workout", "Meal Prep", "Read a Book"],
+      Rain: ["Bake Something", "Organize Digital Files", "Do a Puzzle", "Watch a Movie"],
+      Drizzle: ["Bake Something", "Organize Digital Files", "Do a Puzzle", "Watch a Movie"],
+      Thunderstorm: ["Play Board Games", "Sort Old Photos", "Listen to Music", "Declutter Closet"],
+      Snow: ["Shovel Snow", "Make Hot Chocolate", "Build a Snowman", "Plan a Trip"],
+      Default: ["Stay Productive!", "Enjoy Your Day!", "Try Something New!"]
+    };
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const loggedInUser = localStorage.getItem('loggedInUser');
+      if (!loggedInUser) {
+          window.location.href = 'login.html';
+          return;
+      }
+
+      // Get UI elements
+      const locationDisplay = document.getElementById("location-name-display");
+      const activitiesList = document.getElementById("activitiesList");
+      const prevBtn = document.getElementById('prev-btn');
+      const nextBtn = document.getElementById('next-btn');
+
+      // State variables
+      let savedLocations = [];
+      let currentIndex = 0;
+
+      // Fetch all saved locations for the user
+      fetch(`/api/saved/all?username=${loggedInUser}`)
+        .then(res => res.json())
+        .then(locations => {
+            savedLocations = locations;
+            if (savedLocations.length === 0) {
+                locationDisplay.textContent = 'No Saved Locations';
+                activitiesList.innerHTML = "<p style='opacity:0.7;'>Save a location on the main page first.</p>";
+                return;
+            }
+            // Start by showing the activities for the first saved location
+            showActivitiesForLocation(currentIndex);
+        })
+        .catch(err => {
+            console.error(err);
+            locationDisplay.textContent = 'Error';
+            activitiesList.innerHTML = '<p>Could not load saved locations.</p>';
+        });
+
+      // Fetches weather for a location and renders the corresponding activities
+      function showActivitiesForLocation(index) {
+          if (index < 0 || index >= savedLocations.length) return;
+
+          const location = savedLocations[index];
+          locationDisplay.textContent = `${location.cityName}, ${location.country}`;
+          activitiesList.innerHTML = "<p>Getting weather...</p>"; // Loading state
+
+          // Fetch the *current* weather for this specific location
+          fetch(`/api/weather/by-coordinates?lat=${location.latitude}&lon=${location.longitude}`)
+            .then(res => {
+                if (!res.ok) throw new Error('Weather data unavailable');
+                return res.json();
+            })
+            .then(weatherData => {
+                renderActivities(weatherData.weatherMain);
+            })
+            .catch(error => {
+                console.error(error);
+                activitiesList.innerHTML = `<p>${error.message}</p>`;
+            });
+      }
+
+      // Renders the list of activities based on a weather condition
+      function renderActivities(weatherMain) {
+          const normalizedWeather = (weatherMain || '').trim().toLowerCase();
+
+          let selected = activities.Default;
+          if (normalizedWeather.includes("clear")) selected = activities.Clear;
+          else if (normalizedWeather.includes("cloud")) selected = activities.Clouds;
+          else if (normalizedWeather.includes("rain")) selected = activities.Rain;
+          else if (normalizedWeather.includes("drizzle")) selected = activities.Drizzle;
+          else if (normalizedWeather.includes("thunder")) selected = activities.Thunderstorm;
+          else if (normalizedWeather.includes("snow")) selected = activities.Snow;
+
+          activitiesList.innerHTML = selected.map(a => `<p style='color: black;'>☁️ ${a}</p>`).join("");
+      }
+
+      // Event listeners for browse buttons
+      prevBtn.addEventListener('click', () => {
+          if (savedLocations.length === 0) return;
+          currentIndex = (currentIndex - 1 + savedLocations.length) % savedLocations.length;
+          showActivitiesForLocation(currentIndex);
+      });
+
+      nextBtn.addEventListener('click', () => {
+          if (savedLocations.length === 0) return;
+          currentIndex = (currentIndex + 1) % savedLocations.length;
+          showActivitiesForLocation(currentIndex);
+      });
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Forecast</title>
+    <link rel="stylesheet" href="forecast.css">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+</head>
+<body>
+<div class="container">
+    <a href="index.html" class="back-btn">
+        <img src="back.png" alt="Back">
+    </a>
+
+    <div class="board">
+        <h2>DAILY FORECAST</h2>
+
+        <div class="browse-controls">
+            <button class="browse-btn" id="prev-btn">&lt;</button>
+            <p id="location-name-display">Loading...</p>
+            <button class="browse-btn" id="next-btn">&gt;</button>
+        </div>
+
+        <div class="content" id="forecast-content">
+            <p>Loading forecast...</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const loggedInUser = localStorage.getItem('loggedInUser');
+      if (!loggedInUser) {
+          window.location.href = 'login.html';
+          return;
+      }
+
+      // Get elements
+      const contentEl = document.getElementById('forecast-content');
+      const locationNameEl = document.getElementById('location-name-display');
+      const prevBtn = document.getElementById('prev-btn');
+      const nextBtn = document.getElementById('next-btn');
+
+      // State variables
+      let savedLocations = [];
+      let currentIndex = 0;
+
+      // Fetch all saved locations first
+      fetch(`/api/saved/all?username=${loggedInUser}`)
+          .then(res => res.json())
+          .then(locations => {
+              savedLocations = locations;
+              if (savedLocations.length === 0) {
+                  locationNameEl.textContent = 'No Saved Locations';
+                  contentEl.innerHTML = '<p>You have no saved locations to view forecasts for.</p>';
+                  return;
+              }
+
+              // Find the index of the location we came from (from index.html)
+              const initialLat = localStorage.getItem('currentLat');
+              const foundIndex = savedLocations.findIndex(loc => loc.latitude.toString() === initialLat);
+              currentIndex = (foundIndex !== -1) ? foundIndex : 0;
+
+              // Show the first forecast
+              showForecastForLocation(currentIndex);
+          })
+          .catch(err => {
+              console.error(err);
+              locationNameEl.textContent = 'Error';
+              contentEl.innerHTML = '<p>Could not load saved locations.</p>';
+          });
+
+      // Function to fetch and render forecast for a specific location by its index
+      function showForecastForLocation(index) {
+          if (index < 0 || index >= savedLocations.length) return;
+
+          const location = savedLocations[index];
+          locationNameEl.textContent = `${location.cityName}, ${location.country}`;
+          contentEl.innerHTML = '<p>Loading forecast...</p>'; // Show loading state
+
+          fetch(`/api/weather/forecast?lat=${location.latitude}&lon=${location.longitude}`)
+              .then(response => {
+                  if (!response.ok) throw new Error('Failed to load forecast');
+                  return response.json();
+              })
+              .then(data => {
+                  renderForecast(data);
+              })
+              .catch(error => {
+                  console.error(error);
+                  contentEl.innerHTML = `<p>${error.message}</p>`;
+              });
+      }
+
+      function renderForecast(forecastList) {
+          if (!forecastList || forecastList.length === 0) {
+              contentEl.innerHTML = '<p>Forecast data is not available.</p>';
+              return;
+          }
+          contentEl.innerHTML = ''; // Clear loading text
+
+          forecastList.forEach(day => {
+              const date = new Date(day.date * 1000);
+              const dayString = date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+              const forecastRow = document.createElement('div');
+              forecastRow.classList.add('forecast-row');
+              forecastRow.innerHTML = `
+                  <p class="forecast-date">${dayString}</p>
+                  <img class="forecast-icon" src="https://openweathermap.org/img/wn/${day.icon}@2x.png" alt="${day.weatherMain}">
+                  <p class="forecast-main">${day.weatherMain}</p>
+                  <p class="forecast-temp">${Math.round(day.tempMax)}° / ${Math.round(day.tempMin)}°</p>
+              `;
+              contentEl.appendChild(forecastRow);
+          });
+      }
+
+      // Event listeners for browse buttons
+      prevBtn.addEventListener('click', () => {
+          if (savedLocations.length === 0) return;
+          currentIndex = (currentIndex - 1 + savedLocations.length) % savedLocations.length;
+          showForecastForLocation(currentIndex);
+      });
+
+      nextBtn.addEventListener('click', () => {
+          if (savedLocations.length === 0) return;
+          currentIndex = (currentIndex + 1) % savedLocations.length;
+          showForecastForLocation(currentIndex);
+      });
+    });
+</script>
+</body>
+</html>

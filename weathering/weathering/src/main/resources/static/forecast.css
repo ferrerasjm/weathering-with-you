@@ -1,0 +1,190 @@
+body {
+    margin: 0;
+    padding: 0;
+    background: url("background.png") no-repeat center center fixed;
+    background-size: cover;
+    font-family: "Press Start 2P";
+    color: white;
+}
+
+
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    height: auto;
+    position: relative;
+    overflow-y: auto;
+}
+
+.back-btn {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    display: inline-block;
+    transition: transform 0.2s ease;
+    width: clamp(40px, 8vw, 50px);
+    height: auto;
+}
+
+.back-btn img {
+    width: 100%;
+    height: auto;
+    image-rendering: pixelated;
+}
+
+.back-btn:hover {
+    transform: scale(1.1);
+}
+
+.board {
+    background: url("bigboard.png") no-repeat center center;
+    background-size: 100% 100%;
+    width: 90vw;
+    max-width: 900px;
+    height: 70vh;
+    min-width: 300px;
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding-top: 5%;
+    text-align: center;
+    margin: 30px 0;
+}
+
+.board h2 {
+    font-size: clamp(1.2rem, 3vw, 30px);
+    margin-top: 1em;
+    margin-bottom: 1.5em;
+    color: rgb(255, 255, 255);
+      text-shadow:
+        -1.5px -1.5px 0 #000,
+        1.5px -1.5px 0 #000,
+        -1.5px 1.5px 0 #000,
+        1.5px 1.5px 0 #000;
+}
+
+/* --- ✅ NEW BROWSE STYLES --- */
+.browse-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    margin-bottom: 15px;
+}
+
+#location-name-display {
+    font-size: clamp(0.8rem, 2.5vw, 18px);
+    text-shadow: 1px 1px 2px black;
+    margin: 0;
+    min-width: 200px; /* Prevents layout shift */
+}
+
+.browse-btn {
+    background: rgba(0, 0, 0, 0.4);
+    border: 2px solid white;
+    color: white;
+    font-family: "Press Start 2P";
+    font-size: 20px;
+    cursor: pointer;
+    padding: 5px 15px;
+    border-radius: 5px;
+    transition: background-color 0.2s;
+}
+
+.browse-btn:hover {
+    background: rgba(0, 0, 0, 0.7);
+}
+/* --- END NEW STYLES --- */
+
+.content {
+    margin-top: 1em;
+    width: 80%;
+    height: 60%; /* Adjusted height */
+    overflow-y: auto;
+    max-height: 400px;
+}
+
+.forecast-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 10px;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+    font-size: clamp(0.7rem, 2vw, 14px);
+    color: black;
+}
+
+.forecast-row:last-child {
+    border-bottom: none;
+}
+
+.forecast-date {
+    flex-basis: 35%;
+    text-align: left;
+}
+
+.forecast-icon {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+}
+
+.forecast-main {
+    flex-basis: 25%;
+    text-align: center;
+}
+
+.forecast-temp {
+    flex-basis: 20%;
+    text-align: right;
+}
+
+.content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.content::-webkit-scrollbar-thumb {
+    background: #666;
+    border-radius: 4px;
+}
+
+@media (max-width: 600px) {
+    .container {
+        padding-top: 80px;
+    }
+    .board {
+        width: 95vw;
+        margin: 20px 0;
+        padding-top: 10%;
+    }
+    .content {
+        height: 60%;
+        max-height: 300px;
+    }
+    .back-btn {
+        width: 50px;
+    }
+    .forecast-row {
+        flex-wrap: wrap;
+        justify-content: center;
+        text-align: center;
+    }
+    .forecast-date, .forecast-main, .forecast-temp {
+        flex-basis: 100%;
+        margin: 2px 0;
+    }
+    .forecast-icon {
+        order: -1; /* Move icon to the top */
+    }
+    .browse-controls {
+        gap: 10px;
+    }
+    #location-name-display {
+        min-width: 150px;
+    }
+}

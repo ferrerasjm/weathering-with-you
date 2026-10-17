@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Weathering With You</title>
+    <link rel="stylesheet" href="index.css">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+</head>
+<body>
+<a href="login.html" class="logout-btn" id="logout-button">
+    <img src="back.png" alt="Logout Icon" />
+    <span>LOGOUT</span>
+</a>
+
+<a href="savedlocations.html" class="savedlocations-btn">
+    <span>SAVED LOCATIONS</span>
+    <img src="forward.png" alt="Forward Icon"/>
+</a>
+
+
+<div class="container">
+    <div class="header" id="datetime-display">
+        <p id="greeting-text" style="font-size: 22px; margin-bottom: 10px; text-align: center; color: white;">
+        </p>
+
+        <p id="date-time-text">Loading time...</p>
+        <script src="live-time.js"></script>
+    </div>
+
+    <div class="main-content">
+        <a href="activities.html" class="link-box">
+            <div class="activities-box">
+                <div class="activities-label"><p>WEATHER PLANS</p></div>
+            </div>
+        </a>
+
+        <div class="box-center">
+            <img src="clear.png" alt="weather" class="weather">
+            <img src="blueWindow.png" alt="window" class="window">
+        </div>
+
+        <a href="forecast.html" class="link-box">
+            <div class="reminders-box">
+                <div class="reminders-label"><p>DAILY FORECAST</p></div>
+            </div>
+        </a>
+    </div>
+
+    <div class="search-bar">
+        <div class="search-wrapper" style="width:100%; justify-content:center;">
+            <input type="text" id="city-input" placeholder="Search city..." autocomplete="off" />
+            <div class="save" id="search-button"> <p class="save-txt">Save</p></div>
+            <ul id="suggestions" class="suggestions" style="display:none;"></ul>
+        </div>
+    </div>
+
+    <div class="footer-row">
+        <div class="cat">
+            <img id="cat-image" src="cat.gif" alt="cat">
+        </div>
+
+        <div class="info">
+            <div class="prev">
+                <img src="prev.png" alt="previous">
+            </div>
+            <div class="details">
+                <p class="loc" id="location-name">LOCATION</p>
+                <p id="temperature">TEMP °C</p>
+                <p id="weather-description">WEATHER</p>
+            </div>
+            <div class="next">
+                <img src="next.png" alt="next">
+            </div>
+        </div>
+
+        <div class="paint">
+            <button class="customize"><img id="paint-bucket-img" src="yellow-bucket.png" alt="customize"></button>
+        </div>
+    </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const loggedInUser = localStorage.getItem('loggedInUser');
+
+        const greetingText = document.getElementById('greeting-text');
+        if (loggedInUser) {
+            greetingText.textContent = `Hello, ${loggedInUser}!`;
+        } else {
+            greetingText.textContent = 'Hello, Guest!';
+        }
+
+        if (!loggedInUser) {
+            window.location.href = 'loading.html';
+            return;
+        }
+
+        const apiWeather = '/api/weather';
+        const apiSaved = '/api/saved';
+        const cityInput = document.getElementById('city-input');
+        const saveButton = document.getElementById('search-button');
+        const prevBtn = document.querySelector('.prev img');
+        const nextBtn = document.querySelector('.next img');
+        const logoutBtn = document.getElementById('logout-button');
+        const suggestionsEl = document.getElementById('suggestions');
+        const locationName = document.getElementById('location-name');
+        const temperatureDisplay = document.getElementById('temperature');
+        const weatherDescription = document.getElementById('weather-description');
+        const toastEl = document.getElementById('toast');
+        const weatherImage = document.querySelector('.weather');
+        const windowImage = document.querySelector('.window');
+        const customizeBtn = document.querySelector('.customize');
+        const paintBucketImage = document.getElementById('paint-bucket-img');
+        const catImage = document.getElementById('cat-image');
+
+        let currentWeatherData = null;
+        let savedLocations = [];
+        let currentIndex = 0;
+        let debounceTimer = null;
+        let toastTimeout = null;
+
+        // Define the color order, starting with your default
+      const windowStyles = ['yellowWindow.png', 'redWindow.png', 'blueWindow.png'];
+      const paintBucketStyles = ['yellow-bucket.png', 'red-bucket.png', 'blue-bucket.png'];
+
+      // Set the starting index to 0 to match the default 'yellowWindow.png'
+      let currentWindowIndex = 0;
+
+      // On page load, set the bucket to show the NEXT color (red)
+      paintBucketImage.src = paintBucketStyles[(currentWindowIndex + 1) % paintBucketStyles.length];
+
+      customizeBtn.addEventListener('click', () => {
+         // 1. Move the index to the next color in the cycle
+         currentWindowIndex = (currentWindowIndex + 1) % windowStyles.length;
+
+         // 2. Update the main window to show this new color
+         windowImage.src = windowStyles[currentWindowIndex];
+
+         // 3. Update the paint bucket to show the color that comes after the new one
+         const nextBucketIndex = (currentWindowIndex + 1) % paintBucketStyles.length;
+         paintBucketImage.src = paintBucketStyles[nextBucketIndex];
+      });
+
+        function showToast(text, duration = 4000) {
+            if (toastTimeout) clearTimeout(toastTimeout);
+            toastEl.textContent = text;
+            toastEl.classList.add('show');
+            toastTimeout = setTimeout(() => toastEl.classList.remove('show'), duration);
+        }
+
+        function handleWeatherCondition(condition) {
+            let newWeatherImg = 'clear.png';
+            let newCatImg = 'cat.gif';
+            let toastMessage = 'Weather data updated 🌤️';
+            const main = (condition || '').toLowerCase();
+
+            if (main.includes('rain') || main.includes('drizzle')) {
+              newWeatherImg = 'rainy.png';
+              newCatImg = 'cat-rain.gif';
+              toastMessage = 'It will rain today — bring an umbrella ☔️';
+            } else if (main.includes('thunder')) {
+              newWeatherImg = 'thunder.png';
+              newCatImg = 'cat-rain.gif';
+              toastMessage = 'Thunderstorms expected — be careful ⚡️';
+            } else if (main.includes('snow')) {
+              newWeatherImg = 'snowy.png';
+              newCatImg = 'cat-snow.gif';
+              toastMessage = 'Snow expected — bundle up ❄️';
+            } else if (main.includes('cloud')) {
+              newWeatherImg = 'cloudy.png';
+              toastMessage = 'Cloudy skies — might be a cozy day ☁️';
+            } else if (main.includes('clear')) {
+              newWeatherImg = 'clear.png';
+              toastMessage = 'It’s clear today — enjoy the sunshine ☀️';
+            }
+
+            weatherImage.src = newWeatherImg;
+            catImage.src = newCatImg;
+            showToast(toastMessage);
+        }
+
+        function debounce(fn, ms) {
+            return (...args) => {
+                if (debounceTimer) clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(() => fn(...args), ms);
+            };
+        }
+
+        function renderSuggestions(list) {
+            suggestionsEl.innerHTML = '';
+            if (!list || list.length === 0) {
+                suggestionsEl.style.display = 'none';
+                return;
+            }
+            list.forEach(s => {
+                const li = document.createElement('li');
+                li.textContent = s.displayName;
+                li.dataset.lat = s.lat;
+                li.dataset.lon = s.lon;
+                li.addEventListener('click', () => {
+                    cityInput.value = s.displayName;
+                    suggestionsEl.style.display = 'none';
+                    fetchWeatherByCoords(s.lat, s.lon, s.displayName);
+                });
+                suggestionsEl.appendChild(li);
+            });
+            suggestionsEl.style.display = 'block';
+        }
+
+        const fetchSuggestions = debounce((q) => {
+            if (!q || q.length < 2) {
+                renderSuggestions([]); return;
+            }
+            fetch(`${apiWeather}/search?query=${encodeURIComponent(q)}`)
+                .then(r => r.json()).then(data => {
+                    const list = data.map(item => ({
+                        ...item,
+                        displayName: item.state ? `${item.name}, ${item.state}, ${item.country}` : `${item.name}, ${item.country}`
+                    }));
+                    renderSuggestions(list);
+                }).catch(() => renderSuggestions([]));
+        }, 300);
+
+        function fetchWeatherByCoords(lat, lon, displayName = null) {
+            const latitude = Number(lat);
+            const longitude = Number(lon);
+            if (!Number.isFinite(latitude) || !Number.isFinite(longitude)
+                || latitude < -90 || latitude > 90
+                || longitude < -180 || longitude > 180) {
+                console.error('Invalid saved location coordinates:', { lat, lon });
+                alert('This saved location has invalid coordinates.');
+                return;
+            }
+
+            fetch(`${apiWeather}/by-coordinates?lat=${encodeURIComponent(latitude)}&lon=${encodeURIComponent(longitude)}`)
+                .then(resp => {
+                    if (!resp.ok) {
+                        return resp.text().then(message => {
+                            throw new Error(`Weather fetch failed (${resp.status}): ${message}`);
+                        });
+                    }
+                    return resp.json();
+                })
+                .then(data => {
+                    currentWeatherData = data;
+                    const fullLocationName = displayName || `${data.cityName}, ${data.country}`;
+                    locationName.textContent = fullLocationName;
+                    temperatureDisplay.textContent = `${data.temperature.toFixed(0)}°C`;
+                    weatherDescription.textContent = data.weatherMain || data.weatherDescription || '';
+                    localStorage.setItem('currentLat', data.lat);
+                    localStorage.setItem('currentLon', data.lon);
+                    localStorage.setItem('lastCity', data.cityName);
+                    localStorage.setItem('lastCountry', data.country);
+                    localStorage.setItem('lastWeather', data.weatherMain);
+                    handleWeatherCondition(data.weatherMain);
+                })
+                .catch(error => {
+                    console.error('Could not fetch weather:', error);
+                    alert('Could not fetch weather. Please try again.');
+                });
+        }
+
+        function showSavedLocation(index) {
+            if (index < 0 || index >= savedLocations.length) return;
+            const loc = savedLocations[index];
+            fetchWeatherByCoords(loc.latitude, loc.longitude, `${loc.cityName}, ${loc.country}`);
+        }
+
+        cityInput.addEventListener('input', (e) => fetchSuggestions(e.target.value.trim()));
+        saveButton.addEventListener('click', () => {
+            if (!currentWeatherData) { alert('No location to save!'); return; }
+            const body = {
+                cityName: currentWeatherData.cityName,
+                country: currentWeatherData.country,
+                latitude: currentWeatherData.lat,
+                longitude: currentWeatherData.lon
+            };
+            fetch(`${apiSaved}/save?username=${loggedInUser}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            }).then(r => r.json()).then(() => {
+                showToast('Location saved successfully ✅');
+                fetch(`${apiSaved}/all?username=${loggedInUser}`)
+                    .then(r => r.json()).then(data => { savedLocations = data; });
+            }).catch(() => alert('Error saving location.'));
+        });
+        prevBtn.addEventListener('click', () => {
+            if (savedLocations.length === 0) return;
+            currentIndex = (currentIndex - 1 + savedLocations.length) % savedLocations.length;
+            showSavedLocation(currentIndex);
+        });
+        nextBtn.addEventListener('click', () => {
+            if (savedLocations.length === 0) return;
+            currentIndex = (currentIndex + 1) % savedLocations.length;
+            showSavedLocation(currentIndex);
+        });
+        logoutBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            localStorage.removeItem('loggedInUser');
+            window.location.href = 'loading.html';
+        });
+        document.addEventListener('click', (ev) => {
+            if (!ev.target.closest('.search-wrapper')) {
+                suggestionsEl.style.display = 'none';
+            }
+        });
+
+        function checkAndSaveDefaultLocation(geoData) {
+            const alreadyExists = savedLocations.some(
+                loc => loc.cityName.toLowerCase() === geoData.cityName.toLowerCase() &&
+                       loc.country.toLowerCase() === geoData.country.toLowerCase()
+            );
+
+            if (!alreadyExists) {
+                console.log('New default location detected. Saving...');
+                const body = {
+                    cityName: geoData.cityName,
+                    country: geoData.country,
+                    latitude: geoData.lat,
+                    longitude: geoData.lon
+                };
+                fetch(`${apiSaved}/save?username=${loggedInUser}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                }).then(r => r.json()).then(newData => {
+                    savedLocations.push(newData);
+                    showToast('Current location saved! 📍');
+                }).catch(err => console.error("Failed to auto-save location:", err));
+            } else {
+                console.log('Default location is already saved. Skipping auto-save.');
+            }
+        }
+
+        fetch(`${apiSaved}/all?username=${loggedInUser}`)
+            .then(r => r.json())
+            .then(data => {
+                savedLocations = data;
+
+                if ('geolocation' in navigator) {
+                    navigator.geolocation.getCurrentPosition(
+                        pos => {
+                            fetch(`${apiWeather}/by-coordinates?lat=${pos.coords.latitude}&lon=${pos.coords.longitude}`)
+                                .then(res => res.json())
+                                .then(weatherData => {
+                                    fetchWeatherByCoords(weatherData.lat, weatherData.lon);
+                                    checkAndSaveDefaultLocation(weatherData);
+                                });
+                        },
+                        () => {
+                            if (savedLocations.length > 0) {
+                                currentIndex = savedLocations.length - 1;
+                                showSavedLocation(currentIndex);
+                            }
+                        }
+                    );
+                } else {
+                    if (savedLocations.length > 0) {
+                        currentIndex = savedLocations.length - 1;
+                        showSavedLocation(currentIndex);
+                    }
+                }
+            })
+            .catch(err => {
+                console.error("Could not load initial data:", err);
+                locationName.textContent = 'Error';
+                temperatureDisplay.textContent = 'N/A';
+            });
+    });
+</script>
+
+</body>
+</html>

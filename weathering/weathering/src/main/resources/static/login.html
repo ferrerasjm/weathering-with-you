@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="stylesheet" href="login.css">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+</head>
+<body>
+<div class="center-wrapper">
+    <div class="board-container">
+        <img src="bigboard.png" alt="Board" class="bigboard-img">
+        <div class="board-content">
+            <h1>LOGIN</h1>
+            <form>
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" required>
+
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required>
+
+                <p class="signup-link">
+                    Don’t have an account?
+                    <a href="signup.html">Sign up</a>
+                </p>
+
+                <div class="forward-btn-wrapper">
+                    <a href="index.html">
+                        <img src="forward.png" alt="Login" class="forward-btn">
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const forwardBtn = document.querySelector('.forward-btn');
+      forwardBtn.addEventListener('click', async (e) => {
+        e.preventDefault();
+
+        const username = document.getElementById('username').value.trim();
+        const password = document.getElementById('password').value.trim();
+
+        if (!username || !password) {
+          alert('Please enter both username and password.');
+          return;
+        }
+
+        try {
+          const res = await fetch('/api/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password })
+          });
+          const data = await res.json();
+
+          if (data.message === 'Login successful') {
+            // ✅ Store the logged-in user's name
+            localStorage.setItem('loggedInUser', username);
+
+            // ✅ Redirect to loading.html first, with target page parameter
+            window.location.href = 'loading.html?redirect=' + encodeURIComponent('index.html');
+          } else {
+            alert(data.message);
+          }
+        } catch (err) {
+          console.error(err);
+          alert('An error occurred while logging in.');
+        }
+      });
+    });
+</script>
+
+</body>
+</html>

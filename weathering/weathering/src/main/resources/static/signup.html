@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up</title>
+    <link rel="stylesheet" href="signup.css">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+</head>
+
+<body>
+<div class="center-wrapper">
+    <div class="board-container">
+        <img src="bigboard.png" alt="Board" class="bigboard-img">
+
+
+        <div class="board-content">
+            <h1>SIGN UP</h1>
+
+            <form>
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" required>
+
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required>
+
+                <label for="confirm">Confirm Password</label>
+                <input type="password" id="confirm" name="confirm" required>
+
+                <p class="login-link">
+                    Already have an account?
+                    <a href="login.html">Login</a>
+                </p>
+            </form>
+        </div>
+
+
+        <div class="forward-btn-wrapper">
+            <a href="index.html">
+                <img src="forward.png" alt="Forward" class="forward-btn">
+            </a>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const forwardBtn = document.querySelector('.forward-btn');
+      forwardBtn.addEventListener('click', async (e) => {
+        e.preventDefault();
+
+        const username = document.getElementById('username').value.trim();
+        const password = document.getElementById('password').value.trim();
+        const confirm = document.getElementById('confirm').value.trim();
+
+        if (!username || !password || !confirm) {
+          alert('Please fill all fields.');
+          return;
+        }
+
+        try {
+          const res = await fetch('/api/auth/signup', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password, confirm })
+          });
+          const data = await res.json();
+
+          // ✅ If registration success → show toast and go to loading.html
+          const toast = document.createElement('div');
+          toast.textContent = data.message;
+          toast.style.position = 'fixed';
+          toast.style.bottom = '30px';
+          toast.style.left = '50%';
+          toast.style.transform = 'translateX(-50%)';
+          toast.style.background = 'rgba(0,0,0,0.85)';
+          toast.style.color = '#fff';
+          toast.style.padding = '10px 20px';
+          toast.style.borderRadius = '8px';
+          toast.style.fontFamily = "'Press Start 2P'";
+          toast.style.fontSize = '12px';
+          toast.style.zIndex = '1000';
+          document.body.appendChild(toast);
+
+          setTimeout(() => {
+            toast.remove();
+            if (data.message.includes('Successfully')) {
+              // ✅ Show loading screen before redirecting to login.html
+              window.location.href = 'loading.html?redirect=' + encodeURIComponent('login.html');
+            }
+          }, 2500);
+        } catch (err) {
+          console.error(err);
+          alert('An error occurred while signing up.');
+        }
+      });
+    });
+</script>
+
+
+</body>
+</html>

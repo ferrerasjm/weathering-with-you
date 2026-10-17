@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Saved Locations</title>
+    <link rel="stylesheet" href="savedlocations.css">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+</head>
+<body>
+<div class="container">
+    <a href="index.html" class="back-btn">
+        <img src="back.png" alt="Back">
+    </a>
+
+    <div class="board">
+        <h2>SAVED LOCATIONS</h2>
+        <div class="content" id="locations-list">
+            <p>Loading saved locations...</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // ✅ Get the logged-in user from local storage
+      const loggedInUser = localStorage.getItem('loggedInUser');
+      if (!loggedInUser) {
+        // If no one is logged in, redirect to the login page
+        window.location.href = 'login.html';
+        return;
+      }
+
+      const apiSaved = 'http://localhost:8080/api/saved';
+      const contentEl = document.getElementById('locations-list');
+
+      // Load saved locations for the current user
+      function loadSavedLocations() {
+        // ✅ Add the username to the API request
+        fetch(`${apiSaved}/all?username=${loggedInUser}`)
+          .then(r => r.json())
+          .then(data => {
+            renderSavedLocations(data);
+          })
+          .catch(err => {
+            console.error(err);
+            contentEl.innerHTML = '<p>Error loading saved locations.</p>';
+          });
+      }
+
+      // Render all saved locations
+      function renderSavedLocations(list) {
+        if (!list || list.length === 0) {
+          contentEl.innerHTML = '<p>No saved locations yet.</p>';
+          return;
+        }
+
+        contentEl.innerHTML = '';
+        list.forEach(loc => {
+          const row = document.createElement('div');
+          row.classList.add('saved-row');
+          row.innerHTML = `
+            <div class="loc-info">
+              <p class="loc-name">${loc.cityName}, ${loc.country}</p>
+            </div>
+            <button class="unsave-btn" data-id="${loc.id}">Unsave</button>
+          `;
+          contentEl.appendChild(row);
+        });
+
+        // Add event listeners for Unsave buttons
+        document.querySelectorAll('.unsave-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const id = btn.dataset.id;
+            if (confirm('Remove this saved location?')) {
+              deleteLocation(id);
+            }
+          });
+        });
+      }
+
+      // Delete a saved location for the current user
+      function deleteLocation(id) {
+        // ✅ Add the username to the API request
+        fetch(`${apiSaved}/delete/${id}?username=${loggedInUser}`, { method: 'DELETE' })
+          .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to delete location.');
+            }
+            loadSavedLocations(); // reload after delete
+          })
+          .catch(err => {
+            console.error(err);
+            alert('Error deleting location');
+          });
+      }
+
+      // Initialize
+      loadSavedLocations();
+    });
+</script>
+</body>
+</html>
