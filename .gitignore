@@ -1,0 +1,35 @@
+# Local configuration and credentials
+.aws/
+.codex/
+.agents/
+.env
+.env.*
+!.env.example
+**/application-local.properties
+**/application-local.yml
+**/application-local.yaml
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.keystore
+
+# Database exports and local data; publish only the reviewed schema
+*.sql
+!database/schema.sql
+*.sqlite
+*.sqlite3
+*.db
+*.log
+
+# Build output and IDE metadata at every directory level
+**/target/
+**/build/
+**/.idea/
+**/.vscode/
+*.iml
+*.iws
+*.ipr
+.DS_Store
+Thumbs.db
