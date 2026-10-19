@@ -1,4 +1,3 @@
-// ---- Real-time Day/Date/Time (12-hour format, no blinking colon) ----
 function startClock() {
   const dateTimeEl = document.getElementById('date-time-text');
 
@@ -14,10 +13,9 @@ function startClock() {
       day: 'numeric'
     });
 
-    // Convert to 12-hour format
     let hours = now.getHours();
     const ampm = hours >= 12 ? 'PM' : 'AM';
-    hours = hours % 12 || 12; // convert 0 -> 12
+    hours = hours % 12 || 12;
 
     const minutes = String(now.getMinutes()).padStart(2, '0');
     const seconds = String(now.getSeconds()).padStart(2, '0');
@@ -30,5 +28,4 @@ function startClock() {
   setInterval(updateClock, 1000);
 }
 
-// Start the clock after page loads
 startClock();

@@ -84,7 +84,6 @@ public class WeatherService {
 
     public WeatherResponse getWeatherByCoordinates(double lat, double lon) {
         try {
-            // Step 1: Get location details (name and country)
             Map<String, String> locationDetails = getLocationDetailsFromCoordinates(lat, lon);
             String cityName = locationDetails.get("name");
             String country = locationDetails.get("country");
@@ -125,6 +124,7 @@ public class WeatherService {
             List<DailyForecast> forecastList = new ArrayList<>();
 
             if (node != null && node.path("list").isArray()) {
+                // Group the 3-hour readings by UTC day before calculating daily extremes.
                 Map<LocalDate, List<JsonNode>> forecastsByDay = new LinkedHashMap<>();
                 for (JsonNode entry : node.path("list")) {
                     LocalDate date = Instant.ofEpochSecond(entry.path("dt").asLong())

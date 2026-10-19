@@ -36,17 +36,14 @@
           return;
       }
 
-      // Get elements
       const contentEl = document.getElementById('forecast-content');
       const locationNameEl = document.getElementById('location-name-display');
       const prevBtn = document.getElementById('prev-btn');
       const nextBtn = document.getElementById('next-btn');
 
-      // State variables
       let savedLocations = [];
       let currentIndex = 0;
 
-      // Fetch all saved locations first
       fetch(`/api/saved/all?username=${loggedInUser}`)
           .then(res => res.json())
           .then(locations => {
@@ -57,12 +54,10 @@
                   return;
               }
 
-              // Find the index of the location we came from (from index.html)
               const initialLat = localStorage.getItem('currentLat');
               const foundIndex = savedLocations.findIndex(loc => loc.latitude.toString() === initialLat);
               currentIndex = (foundIndex !== -1) ? foundIndex : 0;
 
-              // Show the first forecast
               showForecastForLocation(currentIndex);
           })
           .catch(err => {
@@ -71,13 +66,12 @@
               contentEl.innerHTML = '<p>Could not load saved locations.</p>';
           });
 
-      // Function to fetch and render forecast for a specific location by its index
       function showForecastForLocation(index) {
           if (index < 0 || index >= savedLocations.length) return;
 
           const location = savedLocations[index];
           locationNameEl.textContent = `${location.cityName}, ${location.country}`;
-          contentEl.innerHTML = '<p>Loading forecast...</p>'; // Show loading state
+          contentEl.innerHTML = '<p>Loading forecast...</p>';
 
           fetch(`/api/weather/forecast?lat=${location.latitude}&lon=${location.longitude}`)
               .then(response => {
@@ -98,7 +92,7 @@
               contentEl.innerHTML = '<p>Forecast data is not available.</p>';
               return;
           }
-          contentEl.innerHTML = ''; // Clear loading text
+          contentEl.innerHTML = '';
 
           forecastList.forEach(day => {
               const date = new Date(day.date * 1000);
@@ -115,7 +109,6 @@
           });
       }
 
-      // Event listeners for browse buttons
       prevBtn.addEventListener('click', () => {
           if (savedLocations.length === 0) return;
           currentIndex = (currentIndex - 1 + savedLocations.length) % savedLocations.length;

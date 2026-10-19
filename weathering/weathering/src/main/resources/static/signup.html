@@ -67,7 +67,6 @@
           });
           const data = await res.json();
 
-          // ✅ If registration success → show toast and go to loading.html
           const toast = document.createElement('div');
           toast.textContent = data.message;
           toast.style.position = 'fixed';
@@ -86,7 +85,6 @@
           setTimeout(() => {
             toast.remove();
             if (data.message.includes('Successfully')) {
-              // ✅ Show loading screen before redirecting to login.html
               window.location.href = 'loading.html?redirect=' + encodeURIComponent('login.html');
             }
           }, 2500);

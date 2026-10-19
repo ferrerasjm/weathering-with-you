@@ -8,9 +8,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class LocationSuggestion {
-    private String name;    // city/place name
-    private String state;   // may be null
-    private String country; // country code like PH, US
+    private String name;
+    private String state;
+    private String country;
     private double lat;
     private double lon;
 

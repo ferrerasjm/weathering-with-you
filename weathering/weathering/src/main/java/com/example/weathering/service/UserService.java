@@ -31,7 +31,6 @@ public class UserService {
         }
     }
 
-    // CREATE
     public String registerUser(String username, String password) {
         if (userRepository.findByUsername(username).isPresent()) {
             return "Username already taken!";
@@ -43,7 +42,6 @@ public class UserService {
         return "Success";
     }
 
-    // READ / LOGIN
     public boolean login(String username, String password) {
         Optional<User> userOpt = userRepository.findByUsername(username);
         if (userOpt.isPresent()) {
@@ -52,12 +50,10 @@ public class UserService {
         return false;
     }
 
-    // READ ALL
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }
 
-    // UPDATE (e.g., change password)
     public String updatePassword(String username, String newPassword) {
         Optional<User> userOpt = userRepository.findByUsername(username);
         if (userOpt.isPresent()) {
@@ -69,7 +65,6 @@ public class UserService {
         return "User not found!";
     }
 
-    // DELETE
     public String deleteUser(String username) {
         Optional<User> userOpt = userRepository.findByUsername(username);
         if (userOpt.isPresent()) {

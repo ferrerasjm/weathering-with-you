@@ -27,7 +27,6 @@
 </div>
 
 <script>
-    // Weather-based activity lists (same as before)
     const activities = {
       Clear: ["Do your Laundry", "Go for a Walk", "Gardening/Yard Work", "Wash the Car"],
       Clouds: ["Deep Clean a Room", "Indoor Workout", "Meal Prep", "Read a Book"],
@@ -45,17 +44,14 @@
           return;
       }
 
-      // Get UI elements
       const locationDisplay = document.getElementById("location-name-display");
       const activitiesList = document.getElementById("activitiesList");
       const prevBtn = document.getElementById('prev-btn');
       const nextBtn = document.getElementById('next-btn');
 
-      // State variables
       let savedLocations = [];
       let currentIndex = 0;
 
-      // Fetch all saved locations for the user
       fetch(`/api/saved/all?username=${loggedInUser}`)
         .then(res => res.json())
         .then(locations => {
@@ -65,7 +61,6 @@
                 activitiesList.innerHTML = "<p style='opacity:0.7;'>Save a location on the main page first.</p>";
                 return;
             }
-            // Start by showing the activities for the first saved location
             showActivitiesForLocation(currentIndex);
         })
         .catch(err => {
@@ -74,15 +69,13 @@
             activitiesList.innerHTML = '<p>Could not load saved locations.</p>';
         });
 
-      // Fetches weather for a location and renders the corresponding activities
       function showActivitiesForLocation(index) {
           if (index < 0 || index >= savedLocations.length) return;
 
           const location = savedLocations[index];
           locationDisplay.textContent = `${location.cityName}, ${location.country}`;
-          activitiesList.innerHTML = "<p>Getting weather...</p>"; // Loading state
+          activitiesList.innerHTML = "<p>Getting weather...</p>";
 
-          // Fetch the *current* weather for this specific location
           fetch(`/api/weather/by-coordinates?lat=${location.latitude}&lon=${location.longitude}`)
             .then(res => {
                 if (!res.ok) throw new Error('Weather data unavailable');
@@ -97,7 +90,6 @@
             });
       }
 
-      // Renders the list of activities based on a weather condition
       function renderActivities(weatherMain) {
           const normalizedWeather = (weatherMain || '').trim().toLowerCase();
 
@@ -112,7 +104,6 @@
           activitiesList.innerHTML = selected.map(a => `<p style='color: black;'>☁️ ${a}</p>`).join("");
       }
 
-      // Event listeners for browse buttons
       prevBtn.addEventListener('click', () => {
           if (savedLocations.length === 0) return;
           currentIndex = (currentIndex - 1 + savedLocations.length) % savedLocations.length;

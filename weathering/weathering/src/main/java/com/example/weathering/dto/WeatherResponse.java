@@ -10,9 +10,9 @@ import lombok.NoArgsConstructor;
 public class WeatherResponse {
 
     private String cityName;
-    private String country; // ✅ ADD THIS NEW FIELD
+    private String country;
     private double temperature; // Celsius
-    private String weatherMain; // Rain, Clouds, Clear, etc.
+    private String weatherMain;
     private String weatherDescription;
     private String icon;
     private double lat;

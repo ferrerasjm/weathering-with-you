@@ -78,13 +78,10 @@ body {
 
 
 .content {
-    /* Use em for margin */
     margin-top: 1em;
     width: 80%;
-    /* Use percentage of the board's height */
     height: 70%;
     overflow-y: auto;
-    /* Set max height to prevent it from growing too big */
     max-height: 400px;
 }
 
@@ -98,8 +95,6 @@ body {
     border-radius: 4px;
 }
 
-/* Add this to the end of activities.css */
-
 .browse-controls {
     display: flex;
     align-items: center;
@@ -111,9 +106,9 @@ body {
 #location-name-display {
     font-size: clamp(0.8rem, 2.5vw, 18px);
     text-shadow: 1px 1px 2px black;
-    color: white; /* Make sure text is visible */
+    color: white;
     margin: 0;
-    min-width: 200px; /* Prevents layout shift */
+    min-width: 200px;
 }
 
 .browse-btn {

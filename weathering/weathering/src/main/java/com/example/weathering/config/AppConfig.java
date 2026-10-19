@@ -15,7 +15,6 @@ public class AppConfig {
         return builder.build();
     }
 
-    // Simple global CORS so your local frontend can call the API (adjust in production!)
     @Bean
     public WebMvcConfigurer corsConfigurer() {
         return new WebMvcConfigurer() {

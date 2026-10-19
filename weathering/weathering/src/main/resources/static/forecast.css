@@ -68,7 +68,6 @@ body {
         1.5px 1.5px 0 #000;
 }
 
-/* --- ✅ NEW BROWSE STYLES --- */
 .browse-controls {
     display: flex;
     align-items: center;
@@ -81,7 +80,7 @@ body {
     font-size: clamp(0.8rem, 2.5vw, 18px);
     text-shadow: 1px 1px 2px black;
     margin: 0;
-    min-width: 200px; /* Prevents layout shift */
+    min-width: 200px;
 }
 
 .browse-btn {
@@ -99,12 +98,11 @@ body {
 .browse-btn:hover {
     background: rgba(0, 0, 0, 0.7);
 }
-/* --- END NEW STYLES --- */
 
 .content {
     margin-top: 1em;
     width: 80%;
-    height: 60%; /* Adjusted height */
+    height: 60%;
     overflow-y: auto;
     max-height: 400px;
 }
@@ -179,7 +177,7 @@ body {
         margin: 2px 0;
     }
     .forecast-icon {
-        order: -1; /* Move icon to the top */
+        order: -1;
     }
     .browse-controls {
         gap: 10px;

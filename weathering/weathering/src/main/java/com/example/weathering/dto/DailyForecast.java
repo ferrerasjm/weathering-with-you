@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class DailyForecast {
-    private long date; // Unix timestamp
+    private long date; // Unix seconds
     private double tempMax;
     private double tempMin;
     private String weatherMain;

@@ -90,7 +90,7 @@ body {
 .box-center {
     width: 100%;
     aspect-ratio: 1;
-    position: relative; /* Essential for absolute positioning of children */
+    position: relative;
 }
 
 .activities-label,
@@ -123,19 +123,18 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: 10; /* Make sure window is on top */
-    object-fit: fill; /* Stretches the window frame to fit perfectly */
+    z-index: 10;
+    object-fit: fill;
 }
 
 .weather {
     position: absolute;
-    /* ✅ ADJUSTED TO FIT INSIDE THE WINDOW FRAME */
-    top: 8%; /* Adjust percentage to visually align with window top */
-    left: 13%; /* Adjust percentage to visually align with window left */
-    width: 80%; /* Adjust percentage to fit horizontally inside the panes */
-    height: 90%; /* Adjust percentage to fit vertically inside the panes */
-    z-index: 5; /* Make sure weather is behind the window */
-    object-fit: cover; /* Scales weather image to fill the background of the opening */
+    top: 8%;
+    left: 13%;
+    width: 80%;
+    height: 90%;
+    z-index: 5;
+    object-fit: cover;
 }
 
 .search-wrapper {
@@ -268,7 +267,6 @@ body {
     object-fit: contain;
 }
 
-/* ✅ MODIFIED: Added this rule to control the paint bucket image size */
 .paint img {
     width: 100%;
     height: 100%;

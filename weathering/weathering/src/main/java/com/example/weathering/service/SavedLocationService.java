@@ -38,12 +38,11 @@ public class SavedLocationService {
     }
 
     public void deleteById(Long id, String username) {
-        // Ensure the location exists and belongs to the user trying to delete it
+        // A user may delete only their own saved locations.
         repo.findById(id).ifPresent(location -> {
             if (location.getUser().getUsername().equals(username)) {
                 repo.deleteById(id);
             } else {
-                // Optionally throw an exception for unauthorized access
                 System.err.println("Attempt to delete location by unauthorized user.");
             }
         });

@@ -40,9 +40,6 @@ public class WeatherController {
         return weatherService.getWeatherByCity(city);
     }
 
-    /**
-     * ✅ NEW ENDPOINT: Get 5-day forecast by exact coordinates.
-     */
     @GetMapping("/forecast")
     public List<DailyForecast> getForecastByCoordinates(
             @RequestParam("lat") @NotNull Double lat,

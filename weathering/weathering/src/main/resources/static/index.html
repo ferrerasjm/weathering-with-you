@@ -122,24 +122,18 @@
         let debounceTimer = null;
         let toastTimeout = null;
 
-        // Define the color order, starting with your default
       const windowStyles = ['yellowWindow.png', 'redWindow.png', 'blueWindow.png'];
       const paintBucketStyles = ['yellow-bucket.png', 'red-bucket.png', 'blue-bucket.png'];
 
-      // Set the starting index to 0 to match the default 'yellowWindow.png'
       let currentWindowIndex = 0;
 
-      // On page load, set the bucket to show the NEXT color (red)
       paintBucketImage.src = paintBucketStyles[(currentWindowIndex + 1) % paintBucketStyles.length];
 
       customizeBtn.addEventListener('click', () => {
-         // 1. Move the index to the next color in the cycle
          currentWindowIndex = (currentWindowIndex + 1) % windowStyles.length;
 
-         // 2. Update the main window to show this new color
          windowImage.src = windowStyles[currentWindowIndex];
 
-         // 3. Update the paint bucket to show the color that comes after the new one
          const nextBucketIndex = (currentWindowIndex + 1) % paintBucketStyles.length;
          paintBucketImage.src = paintBucketStyles[nextBucketIndex];
       });

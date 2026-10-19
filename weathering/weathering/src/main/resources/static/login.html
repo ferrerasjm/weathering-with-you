@@ -58,10 +58,8 @@
           const data = await res.json();
 
           if (data.message === 'Login successful') {
-            // ✅ Store the logged-in user's name
             localStorage.setItem('loggedInUser', username);
 
-            // ✅ Redirect to loading.html first, with target page parameter
             window.location.href = 'loading.html?redirect=' + encodeURIComponent('index.html');
           } else {
             alert(data.message);
