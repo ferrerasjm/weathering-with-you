@@ -16,25 +16,22 @@ A weather dashboard with a pixel-art interface, built with Spring Boot, Java, My
 ## Run locally
 
 1. Create a local database named `weathering_db` and a database user with access to it. Hibernate creates the tables on startup; `database/schema.sql` is also available for manual setup and contains no user data.
-2. Set the environment variables below in PowerShell, using your own credentials. `.env.example` lists the settings; Spring Boot does not automatically load `.env` files.
+2. Copy `.env.example` to `.env` and edit the copy with your own API key and database credentials. Leave `DB_PASSWORD=` blank if your local MySQL user has no password. `.env` is ignored by Git.
 
    ```powershell
-   $env:OPENWEATHER_API_KEY = 'your-openweather-api-key'
-   $env:DB_URL = 'jdbc:mysql://localhost:3306/weathering_db'
-   $env:DB_USERNAME = 'your-database-username'
-   $env:DB_PASSWORD = 'your-database-password'
+   if (-not (Test-Path .env)) { Copy-Item .env.example .env }
+   notepad .env
    ```
 
-3. Start the application from the Maven project directory:
+3. Start the application from the repository root. The script loads `.env` for this run and starts Maven from the project directory:
 
    ```powershell
-   cd weathering/weathering
-   .\mvnw.cmd spring-boot:run
+   powershell -NoProfile -ExecutionPolicy Bypass -File .\run-local.ps1
    ```
 
 4. Open <http://localhost:8080>.
 
-On macOS or Linux, export the same environment variables and use `sh ./mvnw spring-boot:run`.
+On macOS or Linux, export the same environment variables and use `sh ./mvnw spring-boot:run` from `weathering/weathering`.
 
 ## Build and test
 
